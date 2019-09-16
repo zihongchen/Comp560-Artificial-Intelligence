@@ -105,10 +105,6 @@ def simple_back(letter_array,matrix,letter_dict):
     column=0
     while(True):
         i=1+i
-        ##
-        if i>1000:
-            print(matrix)
-        ##
         if check_all(matrix,letter_array,letter_dict):
             return matrix, i
         else:
@@ -125,21 +121,13 @@ def simple_back(letter_array,matrix,letter_dict):
                         else:
                             column=column+1
             elif matrix[row,column]==len(matrix):
-                matrix[row,column]=0
-                if column==0:
-                    column=len(matrix)-1
-                    row=row-1
-                else:
-                    column=column-1
-                    if matrix[row,column]==len(matrix):
-                        while matrix[row,column]==len(matrix):
-                            matrix[row,column]=0
-                            if column==0:
-                                column=len(matrix)-1
-                                row=row-1
-                            else:
-                                column=column-1
+                while matrix[row,column]==len(matrix):
+                    matrix[row,column]=0
+                    if column==0:
+                        column=len(matrix)-1
+                        row=row-1
                     else:
-                        matrix[row,column]=matrix[row,column]+1
+                        column=column-1
+                matrix[row,column]=matrix[row,column]+1
             else:
                 matrix[row,column]=matrix[row,column]+1
