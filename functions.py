@@ -2,6 +2,7 @@ import string
 import random
 import unittest
 import numpy as np
+import math
 
 def setup(file_name):
     #open the file
@@ -131,3 +132,119 @@ def simple_back(letter_array,matrix,letter_dict):
                 matrix[row,column]=matrix[row,column]+1
             else:
                 matrix[row,column]=matrix[row,column]+1
+                
+def prime_factors(n):
+    x=list()
+    x.append(1)
+    while n%2==0:
+        x.append(2)
+        n=n/2
+    for i in range(3,int(math.sqrt(n))+1,2):
+        while n%i==0:
+            x.append(int(i))
+            n=n/i
+    if n>2:
+        x.append(int(n))
+    return x
+
+def quick_get_choices_letters(file_name):
+    letter_array,matrix,letter_dict=setup(file_name)
+    return get_choices_letters(matrix,letter_dict)
+
+def get_choices_letters(solution,letter_dict):
+    choices=[[0]*len(solution) for i in range(0,len(solution))]
+    for key in letter_dict.keys():
+        length=len(letter_dict.get(key))-1
+        oper=letter_dict.get(key)[0][-1]
+        locations=letter_dict.get(key)[1:]
+        if oper.isdigit(): 
+            total=int(letter_dict.get(key)[0])
+        else:
+            total=int(letter_dict.get(key)[0][:-1])
+        options=[]
+        if oper=="+":
+            for pos in range(1,len(solution)+1):
+                if pos>=total:
+                    continue
+                elif math.floor((total-pos)/(length-1))>len(solution):
+                    continue
+                options.append(pos)
+        elif oper=="*":
+            primes=prime_factors(total)
+            for pos in range(1,len(solution)+1):
+                #check if the guess's factors are in the total's factor
+                if all(elem in primes for elem in prime_factors(pos)):
+                    # checks if it can fit inside the given space.
+                    ##thinking about it
+                    if (total/pos)<=(len(solution)**(length-1)):
+                        options.append(pos)
+        elif oper=="-":
+            for pos in range(1,len(solution)+1):
+                if total+pos<len(solution)+1:
+                    options.append(pos)
+                    options.append(total+pos)
+        elif oper=="/":
+            for pos in range(1,len(solution)+1):
+                if total*pos<len(solution)+1:
+                    options.append(pos)
+                    options.append(total*pos)
+        else:
+            options=[total]
+        for loc in locations:
+                choices[loc[0]][loc[1]]=list(set(options))
+    to_start=dict()
+    for i in range(0,len(choices)):
+        for j in range(0,len(choices)):
+            to_start[str(i)+str(j)]=len(choices[i][j])
+    to_start = sorted(to_start.items(), key=lambda x: x[1])
+    return choices,to_start
+## added letter restrictiongs
+def complex_back(letter_array,matrix,letter_dict):
+    choices,to_start=get_choices_letters(matrix,letter_dict)
+    i=0
+    j=0
+    row=int(to_start[j][0][0])
+    column=int(to_start[j][0][1])
+    while(True):
+        i=1+i
+        if check_all(matrix,letter_array,letter_dict):
+            return matrix, i
+        else:
+            if matrix[row,column]==0:
+                matrix[row,column]=choices[row][column][0]
+            elif (True==
+                    letter_check([row,column],matrix,letter_array,letter_dict)==
+                    column_checker(column,matrix)==
+                    row_checker(row,matrix)
+                    ):
+                j=j+1
+                row=int(to_start[j][0][0])
+                column=int(to_start[j][0][1])
+            elif matrix[row,column]==choices[row][column][-1]:
+                last_one=choices[row][column][-1]
+                while matrix[row,column]==last_one:
+                    matrix[row,column]=0
+                    j=j-1
+                    row=int(to_start[j][0][0])
+                    column=int(to_start[j][0][1])
+                    last_one=choices[row][column][-1]
+                if matrix[row,column]==0:
+                    matrix[row,column]=choices[row][column][0]
+                else:
+                    ind=(choices[row][column]).index(matrix[row,column])
+                    matrix[row,column]=choices[row][column][ind+1]
+            else:
+                ind=(choices[row][column]).index(matrix[row,column])
+                matrix[row,column]=choices[row][column][ind+1]
+                
+## combines all the searches                
+def combination_searches(file_name):
+    letter_array,matrix,letter_dict=setup(file_name)
+    sol_back,ib=simple_back(letter_array,matrix.copy(),letter_dict)
+    sol_back_com,ibc=complex_back(letter_array,matrix.copy(),letter_dict)
+    for i in range(0,len(sol_back_com)):
+        line = ' '.join(str(e) for e in sol_back_com[i])
+        print(line)
+    print()
+    print(ib)
+    print(ibc)
