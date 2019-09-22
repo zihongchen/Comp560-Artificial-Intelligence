@@ -54,14 +54,23 @@ def column_checker(column,matrix):
 
 #letter_checker: based on location
 #assumptions are that - and / only have two numbers
+## true if there is a value eqaul to zero or if all the values satisfy the letter requirements
 def letter_check(location,matrix,letter_array,letter_dict):
+    #letter array is the martix of letters
+    #letter dictionary is
+        ##key is letter
+        ##value is array
+            ###1st value is total and operation
+            ### the other values are locations of the letter
     letter=letter_array[location[0]][location[1]]
     oper=letter_dict.get(letter)[0][-1]
+    #check if oper is a digit or not because some values can only be a digit with no operation 
     if oper.isdigit(): 
         total=int(letter_dict.get(letter)[0])
     else:
         total=int(letter_dict.get(letter)[0][:-1])
     values=letter_dict.get(letter)[1:]
+    #for + and * not to add a operation 
     first=True
     ##there are only two values for - and /
     if(oper == "-")|(oper == '/'):
@@ -75,6 +84,7 @@ def letter_check(location,matrix,letter_array,letter_dict):
             total_num=str(num0)+oper+str(num1)
         else:
             total_num=str(num1)+oper+str(num0)
+    #for + and *
     else:
         for val in values:
             num=matrix[val[0]][val[1]]
@@ -85,6 +95,7 @@ def letter_check(location,matrix,letter_array,letter_dict):
                 first=False
             else:
                 total_num=total_num+oper+str(num)
+    #so using eval it calucalute a math operation
     return int(total)==eval(total_num)
 #checks if value at location is not 0
 def check_no_zero(location,matrix):
@@ -103,6 +114,7 @@ def check_all(matrix,letter_array,letter_dict):
     
     
 def simple_back(letter_array,matrix,letter_dict):
+    #i is counter
     i=0
     row=0
     column=0
@@ -162,6 +174,7 @@ def prime_factors(n):
 def quick_get_choices_letters(file_name):
     letter_array,matrix,letter_dict=setup(file_name)
     return get_choices_letters(matrix,letter_dict)
+
 # builds martix with all the possible choices
 def get_choices_letters(solution,letter_dict):
     choices=[[0]*len(solution) for i in range(0,len(solution))]
@@ -177,8 +190,10 @@ def get_choices_letters(solution,letter_dict):
         #addtion
         if oper=="+":
             for pos in range(1,len(solution)+1):
+                # if the pos is greater or equal to the total, no number can be added to it to make it the total
                 if pos>=total:
                     continue
+                    ## if the total-value/(length of the letter size -1) is greater than the maximum value possible, it can not be a solution
                 elif math.floor((total-pos)/(length-1))>len(solution):
                     continue
                 options.append(pos)
@@ -186,9 +201,9 @@ def get_choices_letters(solution,letter_dict):
             primes=prime_factors(total)
             for pos in range(1,len(solution)+1):
                 #check if the guess's factors are in the total's factor
+                # if the all the pos's prime factors are not in the total's prime factors, then do not include them
                 if all(elem in primes for elem in prime_factors(pos)):
-                    # checks if it can fit inside the given space.
-                    ##thinking about it
+                    ## if the total/value is greater than the maximum value possible**(length of the letter size -1), it can not be a solution
                     if (total/pos)<=(len(solution)**(length-1)):
                         options.append(pos)
         elif oper=="-":
@@ -205,6 +220,8 @@ def get_choices_letters(solution,letter_dict):
             options=[total]
         for loc in locations:
                 choices[loc[0]][loc[1]]=list(set(options))
+    ##to start is the array of locations of where we should start
+    ##ordered by size of location
     to_start=dict()
     for i in range(0,len(choices)):
         for j in range(0,len(choices)):
@@ -212,10 +229,12 @@ def get_choices_letters(solution,letter_dict):
     to_start = sorted(to_start.items(), key=lambda x: x[1])
     return choices,to_start
 ## added letter restrictiongs
+##changes are the letters contrictions and starting with the most
 def complex_back(letter_array,matrix,letter_dict):
     #builds choices and the location to start the choices
     choices,to_start=get_choices_letters(matrix,letter_dict)
     i=0
+    # is the value at the most constranted location 
     j=0
     row=int(to_start[j][0][0])
     column=int(to_start[j][0][1])
@@ -235,8 +254,10 @@ def complex_back(letter_array,matrix,letter_dict):
                 j=j+1
                 row=int(to_start[j][0][0])
                 column=int(to_start[j][0][1])
+                ## checks if the matrix value is the last possible value in the choices array
             elif matrix[row,column]==choices[row][column][-1]:
                 last_one=choices[row][column][-1]
+                ##go through each of the previous values, if they are the last value of the choice martix then set it to 0 and go the the next previous location and do the same check
                 while matrix[row,column]==last_one:
                     #choices=add_location_possibilites(row,column,choices,matrix,letter_dict,letter_array)
                     matrix[row,column]=0
@@ -245,20 +266,24 @@ def complex_back(letter_array,matrix,letter_dict):
                         return "No Solution",i
                     row=int(to_start[j][0][0])
                     column=int(to_start[j][0][1])
+                    ##last_one is the last choice in the choice martix of that location
                     last_one=choices[row][column][-1]
                 if matrix[row,column]==0:
                     matrix[row,column]=choices[row][column][0]
                     #remove poss
                     #choices=remove_location_possibilites(row,column,choices,matrix)
                 else:
+                    ## ind is the index value of the choices of that location's current value
                     ind=(choices[row][column]).index(matrix[row,column])
                     matrix[row,column]=choices[row][column][ind+1]
                     #choices=remove_location_possibilites(row,column,choices,matrix)
             else:
+                ## ind is the index value of the choices of that location's current value
                 ind=(choices[row][column]).index(matrix[row,column])
                 matrix[row,column]=choices[row][column][ind+1]
                 #choices=remove_location_possibilites(row,column,choices,matrix)
-                
+
+### these are possible other function we were planing to use but it was too complex
 ## removes possibilites from rows and columns of choices
 # def remove_location_possibilites(row,column, choices, matrix):
 #     value_remove=matrix[row,column]
@@ -354,18 +379,18 @@ def complex_back(letter_array,matrix,letter_dict):
     
 
 
-##adds possibilities from rows and columns of choices
-def add_location_possibilites(row,column, choices, matrix,letter_dict,letter_array):
-    value_add=matrix[row,column]
-    for i in range(0,len(choices)):
-        if i != row:
-            #do not want to add multiple values
-            if not value_add in choices[i][column]:
-                choices[i][column]=add_letter(value_add,i,column,choices,letter_dict,letter_array)
-        if i != column:
-            if not value_add in choices[row][i]:
-                choices[row][i]=add_letter(value_add,row,i,choices,letter_dict,letter_array)
-    return choices
+# ##adds possibilities from rows and columns of choices
+# def add_location_possibilites(row,column, choices, matrix,letter_dict,letter_array):
+#     value_add=matrix[row,column]
+#     for i in range(0,len(choices)):
+#         if i != row:
+#             #do not want to add multiple values
+#             if not value_add in choices[i][column]:
+#                 choices[i][column]=add_letter(value_add,i,column,choices,letter_dict,letter_array)
+#         if i != column:
+#             if not value_add in choices[row][i]:
+#                 choices[row][i]=add_letter(value_add,row,i,choices,letter_dict,letter_array)
+#     return choices
     
                 
                 
