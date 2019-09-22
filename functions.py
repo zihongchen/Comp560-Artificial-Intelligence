@@ -63,6 +63,7 @@ def letter_check(location,matrix,letter_array,letter_dict):
         total=int(letter_dict.get(letter)[0][:-1])
     values=letter_dict.get(letter)[1:]
     first=True
+    ##there are only two values for - and /
     if(oper == "-")|(oper == '/'):
         val0=values[0]
         val1=values[1]
@@ -85,9 +86,10 @@ def letter_check(location,matrix,letter_array,letter_dict):
             else:
                 total_num=total_num+oper+str(num)
     return int(total)==eval(total_num)
-
+#checks if value at location is not 0
 def check_no_zero(location,matrix):
     return matrix[location[0]][location[1]]!=0
+#checks all the assumptions for the whole matrix
 def check_all(matrix,letter_array,letter_dict):
     for y in range(0,len(matrix)):
             for x in range(0,len(matrix)):
@@ -104,27 +106,37 @@ def simple_back(letter_array,matrix,letter_dict):
     i=0
     row=0
     column=0
+    #looping
     while(True):
         i=1+i
+        #check if martix is complete
         if check_all(matrix,letter_array,letter_dict):
             return matrix, i
         else:
+            #if value is 0 make it 1
             if matrix[row,column]==0:
                 matrix[row,column]=1
+             #check if we can move to the next node
             elif (True==
                     letter_check([row,column],matrix,letter_array,letter_dict)==
                     column_checker(column,matrix)==
                     row_checker(row,matrix)
                     ):
+                        #if the location is at the end of the row
                         if(column==len(matrix)-1):
                             column=0
                             row=1+row
                         else:
                             column=column+1
+            #if the node does not work and is the last value 
             elif matrix[row,column]==len(matrix):
+                #goes through each of the values backwards and sets them to zero if they are the last value
                 while matrix[row,column]==len(matrix):
                     matrix[row,column]=0
                     if column==0:
+                        # at the first location and tried all combinations.
+                        if row==0:
+                              return "No Solution",i
                         column=len(matrix)-1
                         row=row-1
                     else:
@@ -132,7 +144,7 @@ def simple_back(letter_array,matrix,letter_dict):
                 matrix[row,column]=matrix[row,column]+1
             else:
                 matrix[row,column]=matrix[row,column]+1
-                
+# finds prime factors for multiplicaton                
 def prime_factors(n):
     x=list()
     x.append(1)
@@ -150,7 +162,7 @@ def prime_factors(n):
 def quick_get_choices_letters(file_name):
     letter_array,matrix,letter_dict=setup(file_name)
     return get_choices_letters(matrix,letter_dict)
-
+# builds martix with all the possible choices
 def get_choices_letters(solution,letter_dict):
     choices=[[0]*len(solution) for i in range(0,len(solution))]
     for key in letter_dict.keys():
@@ -162,6 +174,7 @@ def get_choices_letters(solution,letter_dict):
         else:
             total=int(letter_dict.get(key)[0][:-1])
         options=[]
+        #addtion
         if oper=="+":
             for pos in range(1,len(solution)+1):
                 if pos>=total:
@@ -200,6 +213,7 @@ def get_choices_letters(solution,letter_dict):
     return choices,to_start
 ## added letter restrictiongs
 def complex_back(letter_array,matrix,letter_dict):
+    #builds choices and the location to start the choices
     choices,to_start=get_choices_letters(matrix,letter_dict)
     i=0
     j=0
@@ -212,6 +226,7 @@ def complex_back(letter_array,matrix,letter_dict):
         else:
             if matrix[row,column]==0:
                 matrix[row,column]=choices[row][column][0]
+                #choices=remove_location_possibilites(row,column,choices,matrix)
             elif (True==
                     letter_check([row,column],matrix,letter_array,letter_dict)==
                     column_checker(column,matrix)==
@@ -223,28 +238,150 @@ def complex_back(letter_array,matrix,letter_dict):
             elif matrix[row,column]==choices[row][column][-1]:
                 last_one=choices[row][column][-1]
                 while matrix[row,column]==last_one:
+                    #choices=add_location_possibilites(row,column,choices,matrix,letter_dict,letter_array)
                     matrix[row,column]=0
                     j=j-1
+                    if j==-1:
+                        return "No Solution",i
                     row=int(to_start[j][0][0])
                     column=int(to_start[j][0][1])
                     last_one=choices[row][column][-1]
                 if matrix[row,column]==0:
                     matrix[row,column]=choices[row][column][0]
+                    #remove poss
+                    #choices=remove_location_possibilites(row,column,choices,matrix)
                 else:
                     ind=(choices[row][column]).index(matrix[row,column])
                     matrix[row,column]=choices[row][column][ind+1]
+                    #choices=remove_location_possibilites(row,column,choices,matrix)
             else:
                 ind=(choices[row][column]).index(matrix[row,column])
                 matrix[row,column]=choices[row][column][ind+1]
+                #choices=remove_location_possibilites(row,column,choices,matrix)
+                
+## removes possibilites from rows and columns of choices
+# def remove_location_possibilites(row,column, choices, matrix):
+#     value_remove=matrix[row,column]
+#     for i in range(0,len(choices)):
+#         if i != row:
+#             #to stop error from element not in list and do not remove all elements from list
+#             if (value_remove in choices[i][column])&len(choices[i][column])>1:
+#                 choices[i][column].remove(value_remove)
+#         if i != column:
+#             if (value_remove in choices[row][i])&len(choices[row][i])>1:
+#                 choices[row][i].remove(value_remove)
+#     return choices
+
+
+##remove letter choices  
+##not using it because i got confused
+# def remove_letter(value,row,column,choices,letter_dict,letter_array):
+#     key=letter_array[row][column]
+#     length=len(letter_dict.get(key))-1
+#     oper=letter_dict.get(key)[0][-1]
+#     if oper.isdigit(): 
+#         total=int(letter_dict.get(key)[0])
+#     else:
+#         total=int(letter_dict.get(key)[0][:-1])
+#         return choices
+#     #ignoring + and * because they are completated
+#     if oper=="+":
+#         if length==2:
+#             choices[row][column].remove(total-value)
+#         return choices
+#     elif oper=="*":
+#         return choices
+#     elif oper=="-":
+#         for pos in range(1,len(solution)+1):
+#             if total+pos<len(solution)+1:
+#                 options.append(pos)
+#                 options.append(total+pos)
+#         if value>total:
+#             value-total=total
+#             options.remove(value)
+#             options.remove(total)
+#     elif oper=="/":
+#         for pos in range(1,len(solution)+1):
+#             if total*pos<len(solution)+1:
+#                 options.append(pos)
+#                 options.append(total*pos)
+#         options.remove(value)
+#         if value>total:
+#             value/total=total
+#             options.remove(total)
+            
+#     else:
+#         options=[total]
+#     for loc in locations:
+#             choices[loc[0]][loc[1]]=list(set(options))
+    
+    
+
+##add letter choices
+# def add_letter(value,row,column,choice,letter_dict,letter_array):
+#     key=letter_array[row][column]
+#     length=len(letter_dict.get(key))-1
+#     oper=letter_dict.get(key)[0][-1]
+#     if oper.isdigit(): 
+#         total=int(letter_dict.get(key)[0])
+#     else:
+#         total=int(letter_dict.get(key)[0][:-1])
+#     options=[]
+#     pos=value
+#     #addtion
+#     if oper=="+":
+#         if not ((pos<=total)|(math.floor((total-pos)/(length-1))>len(letter_array))):
+#             choice[row][column].append(pos)
+#     elif oper=="*":
+#         primes=prime_factors(total)
+#         #check if the guess's factors are in the total's factor
+#         if all(elem in primes for elem in prime_factors(pos)):
+#             # checks if it can fit inside the given space.
+#             ##thinking about it
+#             if (total/pos)<=(len(letter_array)**(length-1)):
+#                    choice[row][column].append(pos)
+#     elif oper=="-":
+#         if total+pos<len(letter_array)+1:
+#                choice[row][column].append(pos)
+#     elif oper=="/":
+#         for pos in range(1,len(letter_array)+1):
+#             if total*pos<len(letter_array)+1:
+#                 choice[row][column].append(pos)
+#     else:
+#         choice[row][column]=[total]
+#     choice[row][column]=list(set(choice[row][column]))
+#     return choice[row][column]
+    
+
+
+##adds possibilities from rows and columns of choices
+def add_location_possibilites(row,column, choices, matrix,letter_dict,letter_array):
+    value_add=matrix[row,column]
+    for i in range(0,len(choices)):
+        if i != row:
+            #do not want to add multiple values
+            if not value_add in choices[i][column]:
+                choices[i][column]=add_letter(value_add,i,column,choices,letter_dict,letter_array)
+        if i != column:
+            if not value_add in choices[row][i]:
+                choices[row][i]=add_letter(value_add,row,i,choices,letter_dict,letter_array)
+    return choices
+    
+                
                 
 ## combines all the searches                
 def combination_searches(file_name):
+    import warnings
+    warnings.simplefilter(action='ignore', category=FutureWarning)
     letter_array,matrix,letter_dict=setup(file_name)
     sol_back,ib=simple_back(letter_array,matrix.copy(),letter_dict)
     sol_back_com,ibc=complex_back(letter_array,matrix.copy(),letter_dict)
-    for i in range(0,len(sol_back_com)):
-        line = ' '.join(str(e) for e in sol_back_com[i])
-        print(line)
+    if sol_back=="No Solution":
+        print(sol_back)
+    else:
+        for i in range(0,len(sol_back_com)):
+            line = ' '.join(str(e) for e in sol_back_com[i])
+            print(line)
     print()
     print(ib)
     print(ibc)
