@@ -130,7 +130,7 @@ def simple_back(letter_array,matrix,letter_dict):
                 matrix[row,column]=1
              #check if we can move to the next node
             elif (True==
-                    ([rowletter_check,column],matrix,letter_array,letter_dict)==
+                    letter_check([row,column],matrix,letter_array,letter_dict)==
                     column_checker(column,matrix)==
                     row_checker(row,matrix)
                     ):
