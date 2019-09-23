@@ -416,8 +416,8 @@ def UTILITYFUNCT(B,lettersdict,lettersB):
         for j in range(N):
             if not letter_check([i,j],B,lettersB,lettersdict):
                 L=L+1
-    #doubled R,C,L because they are worth more than Z
-    U=2*(R+C+L)+Z
+    #N* R,C because they are worth more than Z,L
+    U=N*(R+C)+Z+L
     return U
 #INPUTS: INITIAL MATRIX CURRENT, LETTERS OF THE CURRENT,LETTERS DIC
 def min_conflicts(lettersdict,lettersCURRENT):
@@ -462,10 +462,11 @@ def min_conflicts(lettersdict,lettersCURRENT):
                     ##last_one is the last choice in the choice martix of that location
                     last_one=choices[j][k][-1]
                     place=A[j,k]
-                ind=(choices[j][k]).index(A[j,k])
-                A[j,k]=choices[j][k][ind+1]
                 #reset the ulitity function because we went backwards
                 U=UTILITYFUNCT(A,lettersdict,lettersCURRENT)
+                ind=(choices[j][k]).index(A[j,k])
+                A[j,k]=choices[j][k][ind+1]
+               
             #if the value is 0 set it to the first choice
             elif A[j,k]==0:
                 A[j,k]=choices[j][k][0]
@@ -479,9 +480,7 @@ def min_conflicts(lettersdict,lettersCURRENT):
                 U=UA
                 CURRENT=A
                 if cur<len(to_start)-1:
-                    cur=cur+1
-        
-            
+                    cur=cur+1          
     
                 
                 
@@ -495,7 +494,7 @@ def combination_searches(file_name):
     letter_array,matrix,letter_dict=setup(file_name)
     sol_back,ib=simple_back(letter_array,matrix.copy(),letter_dict)
     sol_back_com,ibc=complex_back(letter_array,matrix.copy(),letter_dict)
-    sol_back_com,loc=min_conflicts(letter_dict,letter_array)
+    sol_back_min,loc=min_conflicts(letter_dict,letter_array)
     if sol_back=="No Solution":
         print(sol_back)
     else:
