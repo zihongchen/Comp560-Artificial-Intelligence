@@ -391,7 +391,101 @@ def complex_back(letter_array,matrix,letter_dict):
 #             if not value_add in choices[row][i]:
 #                 choices[row][i]=add_letter(value_add,row,i,choices,letter_dict,letter_array)
 #     return choices
+#OUT UTILITY FUNCTION DEFINED BY U=R+C+L
+#R->NUMBER OF ROWS WITH EQUAL NUMBERS
+#C->NUMBER OF COLUMNS WITH EQUAL NUMBERS
+#Z-> number of zeros
+#L->NUMBER OF LOCATIONS THAT DON'T SATISFY THE LETTER RESTRICTION
+def UTILITYFUNCT(B,lettersdict,lettersB):
+    N=np.shape(B)[0]
+    R=0
+    C=0
+    L=0
+    Z=0
+    for i in range(N):
+        for j in range(N):
+            if not check_no_zero([i,j],B):
+                Z=Z+1
+    for i in range(N):
+        if not row_checker(i,B):
+            R=R+1
+    for j in range(N):
+        if not column_checker(j,B):
+            C=C+1
+    for i in range(N):
+        for j in range(N):
+            if not letter_check([i,j],B,lettersB,lettersdict):
+                L=L+1
+    #doubled R,C,L because they are worth more than Z
+    U=2*(R+C+L)+Z
+    return U
+#INPUTS: INITIAL MATRIX CURRENT, LETTERS OF THE CURRENT,LETTERS DIC
+def min_conflicts(lettersdict,lettersCURRENT):
+    dim=len(lettersCURRENT)
+    CURRENT=np.array([[0]*dim for i in range(dim)])
+    choices,to_start=get_choices_letters(CURRENT,lettersdict)
+    #CURRENT is the VALUES OF THE MATRIX
+    iterat=0
+    for row in range(0,len(choices)):
+        for col in range(0,len(choices)):
+            CURRENT[row,col]=0
+    #UTILITY FUNCTION U
+    A=CURRENT
+    U=UTILITYFUNCT(CURRENT,lettersdict,lettersCURRENT)
+    UA=U
+    # is the value at the most constranted location 
+    cur=0
+
+    while True:
+        iterat=iterat+1
+        #check if its done
+        if U==0:
+            return CURRENT,iterat
+        else:
+            j=int(to_start[cur][0][0])
+            k=int(to_start[cur][0][1])
+            A=CURRENT
+            #goes to the choices and picks one
+                ##if it is the last value, goes to the previous value
+                ###This is the problem
+            if A[j,k]==choices[j][k][-1]:
+                last_one=choices[j][k][-1]
+                place=A[j,k]
+            ##go through each of the previous values, if they are the last value of the choice martix then set it to 0 and go the the next previous location and do the same check
+                while place==last_one:
+                    A[j,k]=0
+                    cur=cur-1
+                    if cur==-1:
+                        return "No Solution",iterat
+                    j=int(to_start[cur][0][0])
+                    k=int(to_start[cur][0][1])
+                    ##last_one is the last choice in the choice martix of that location
+                    last_one=choices[j][k][-1]
+                    place=A[j,k]
+                ind=(choices[j][k]).index(A[j,k])
+                A[j,k]=choices[j][k][ind+1]
+                #reset the ulitity function because we went backwards
+                U=UTILITYFUNCT(A,lettersdict,lettersCURRENT)
+            #if the value is 0 set it to the first choice
+            elif A[j,k]==0:
+                A[j,k]=choices[j][k][0]
+            #if the value is not zero and the last value, go to the next choice
+            else:
+                ind=(choices[j][k]).index(A[j,k])
+                A[j,k]=choices[j][k][ind+1]
+            UA=UTILITYFUNCT(A,lettersdict,lettersCURRENT)
+            #if utility function improved, kept it 
+            if UA<=U:
+                U=UA
+                CURRENT=A
+                if cur<len(to_start)-1:
+                    cur=cur+1
+        
+            
     
+                
+                
+                            
                 
                 
 ## combines all the searches                
@@ -401,6 +495,7 @@ def combination_searches(file_name):
     letter_array,matrix,letter_dict=setup(file_name)
     sol_back,ib=simple_back(letter_array,matrix.copy(),letter_dict)
     sol_back_com,ibc=complex_back(letter_array,matrix.copy(),letter_dict)
+    sol_back_com,loc=min_conflicts(letter_dict,letter_array)
     if sol_back=="No Solution":
         print(sol_back)
     else:
@@ -410,3 +505,4 @@ def combination_searches(file_name):
     print()
     print(ib)
     print(ibc)
+    print(loc)
