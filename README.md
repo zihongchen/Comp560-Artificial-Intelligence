@@ -1,1 +1,1 @@
-# comp560_kenken - Ahmet Hatip, Ina Piera, Zihong Chen
+# comp560_kenken - Ahmet Hatip, Ignacio Piera, Zihong Chen
